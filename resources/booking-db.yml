@@ -1,0 +1,39 @@
+Resources:
+ BookingsDB:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${self:custom.BookingsDB}
+      AttributeDefinitions:
+        - AttributeName: bookingId
+          AttributeType: S
+        - AttributeName: listingId
+          AttributeType: S
+
+
+      KeySchema:
+        - AttributeName: bookingId
+          KeyType: HASH
+        - AttributeName: listingId
+          KeyType: RANGE
+      # Set the capacity based on the stage
+      ProvisionedThroughput:
+        ReadCapacityUnits: ${self:custom.tableThroughput}
+        WriteCapacityUnits: ${self:custom.tableThroughput}
+We are doing the same thing here, only difference is that we made the Sort Key the listingId.
+
+Now we need to reference it in our serverless.yml:
+
+resources:
+  - ${file(resources/listing-db.yml)}
+  - ${file(resources/booking-db.yml)}
+In the same file we need to create those tables in the custom section of the file:
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  region: ${opt:region, self:provider.region}
+  ListingsDB: ${self:custom.stage}-listings
+  BookingsDB: ${self:custom.stage}-bookings
+  tableThroughputs:
+    prod: 1
+    default: 1
+  tableThroughput: ${self:custom.tableThroughputs.${self:custom.stage}, self:custom.tableThroughputs.default}
