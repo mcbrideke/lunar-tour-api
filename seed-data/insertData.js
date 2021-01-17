@@ -45,7 +45,6 @@ listings.map(l => {
     if (err) {
       console.error(
         "Unable to add listing",
-        user.name,
         ". Error JSON:",
         JSON.stringify(err, null, 2)
       )
